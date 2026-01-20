@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Từ Vựng Tiếng Anh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 36px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #4a5568;
+            margin-bottom: 35px;
+            font-size: 18px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .vocab-item {
+            position: relative;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            font-size: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90px;
+        }
+        
+        .vocab-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .vocab-word {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audio-indicator {
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .vocab-item:hover .audio-indicator {
+            opacity: 1;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #1a202c;
+            color: white;
+            padding: 20px 26px 24px 26px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 400;
+            white-space: normal;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            max-width: 400px;
+            min-width: 250px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        
+        /* Thêm vùng đệm invisible để dễ hover */
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120%;
+            height: 25px;
+            background: transparent;
+        }
+        
+        /* Cho phép click vào tooltip */
+        .vocab-item:hover .tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-15px);
+            pointer-events: auto;
+        }
+
+        .tooltip:hover {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Mũi tên to hơn */
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 15px solid transparent;
+            border-top-color: #1a202c;
+        }
+
+        .tooltip-ipa {
+            color: #fbbf24;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tooltip-paraphrase {
+            color: #a0aec0;
+            font-size: 14px;
+            font-style: italic;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .tooltip-meaning {
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .youglish-btn {
+            margin-top: 8px;
+            padding: 10px 18px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .youglish-btn:hover {
+            background: #38a169;
+            transform: scale(1.05);
+        }
+
+        .vocab-count {
+            text-align: center;
+            color: #718096;
+            margin-top: 30px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .voice-select {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .voice-select:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .vocab-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+            
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .vocab-item {
+                font-size: 18px;
+                padding: 20px 15px;
+                min-height: 80px;
+            }
+
+            .tooltip {
+                font-size: 14px;
+                padding: 16px 20px;
+                max-width: 280px;
+            }
+
+            .tooltip-ipa {
+                font-size: 15px;
+            }
+
+            .tooltip-meaning {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Học Từ Vựng Tiếng Anh</h1>
+        <p class="subtitle">Em di chuột lên từ vựng để biết nghĩa và cách phát âm</p>
+        
+        <div class="controls">
+            <select class="voice-select" id="voiceSelect">
+                <option value="">Đang tải giọng đọc...</option>
+            </select>
+        </div>
+
+        <div class="vocab-grid" id="vocabGrid"></div>
+        <div class="vocab-count" id="vocabCount"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // PHẦN NÀY ĐỂ THẦY/CÔ CHỈNH TỪ VỰNG
+        // Format: 'word': { ipa: 'phiên âm', paraphrase: 'giải thích ngắn', meaning: 'nghĩa tiếng Việt' }
+        // ==========================================
+        const VOCABULARY = {
+            'ambitious': {
+                ipa: '/æmˈbɪʃəs/',
+                paraphrase: 'having strong desire for success',
+                meaning: 'tham vọng, có nhiều tham vọng'
+            },
+            'perseverance': {
+                ipa: '/ˌpɜːrsəˈvɪrəns/',
+                paraphrase: 'continued effort despite difficulties',
+                meaning: 'sự kiên trì'
+            },
+            'resilient': {
+                ipa: '/rɪˈzɪliənt/',
+                paraphrase: 'able to recover quickly from difficulties',
+                meaning: 'kiên cường, có khả năng phục hồi'
+            },
+            'eloquent': {
+                ipa: '/ˈeləkwənt/',
+                paraphrase: 'fluent and persuasive in speaking',
+                meaning: 'hùng biện, diễn đạt lưu loát'
+            },
+            'meticulous': {
+                ipa: '/məˈtɪkjələs/',
+                paraphrase: 'showing great attention to detail',
+                meaning: 'tỉ mỉ, cẩn thận'
+            },
+            'innovative': {
+                ipa: '/ˈɪnəveɪtɪv/',
+                paraphrase: 'featuring new methods or ideas',
+                meaning: 'đổi mới, sáng tạo'
+            },
+            'compassionate': {
+                ipa: '/kəmˈpæʃənət/',
+                paraphrase: 'feeling or showing sympathy',
+                meaning: 'thương cảm, từ bi'
+            },
+            'diligent': {
+                ipa: '/ˈdɪlɪdʒənt/',
+                paraphrase: 'having or showing care in work',
+                meaning: 'siêng năng, cần cù'
+            },
+            'integrity': {
+                ipa: '/ɪnˈteɡrəti/',
+                paraphrase: 'quality of being honest and moral',
+                meaning: 'sự chính trực, liêm chính'
+            },
+            'profound': {
+                ipa: '/prəˈfaʊnd/',
+                paraphrase: 'very great or intense; deep',
+                meaning: 'sâu sắc, thâm thúy'
+            }
+        };
+        // ==========================================
+
+        let voices = [];
+        let selectedVoice = null;
+
+        // Load voices - chỉ giữ Mark, Google US, và 2 giọng UK
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            
+            // Filter specific voices only
+            const allowedVoices = voices.filter(voice => {
+                const name = voice.name.toLowerCase();
+                const lang = voice.lang.toLowerCase();
+                
+                return (
+                    name.includes('mark') || // Giọng Mark
+                    (name.includes('google') && lang.includes('en-us')) || // Google US
+                    (name.includes('google') && lang.includes('en-gb')) || // Google UK
+                    (lang.includes('en-gb') && !name.includes('google')) // UK voices khác
+                );
+            });
+
+            if (allowedVoices.length === 0) {
+                voiceSelect.innerHTML = '<option>Không tìm thấy giọng phù hợp</option>';
+                return;
+            }
+
+            voiceSelect.innerHTML = '';
+            
+            allowedVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                
+                // Friendly names
+                let displayName = voice.name;
+                if (voice.name.includes('Google') && voice.lang.includes('US')) {
+                    displayName = '🇺🇸 Google US English';
+                } else if (voice.name.includes('Google') && voice.lang.includes('GB')) {
+                    displayName = '🇬🇧 Google UK English';
+                } else if (voice.name.toLowerCase().includes('mark')) {
+                    displayName = '🇺🇸 Mark (US)';
+                } else if (voice.lang.includes('GB')) {
+                    displayName = `🇬🇧 ${voice.name}`;
+                }
+                
+                option.textContent = displayName;
+                voiceSelect.appendChild(option);
+                
+                // Set default to Google US or Mark
+                if (!selectedVoice && (
+                    voice.name.includes('Google US') || 
+                    voice.name.toLowerCase().includes('mark')
+                )) {
+                    selectedVoice = voice;
+                    voiceSelect.value = index;
+                }
+            });
+
+            // If no preferred voice found, use first one
+            if (!selectedVoice && allowedVoices.length > 0) {
+                selectedVoice = allowedVoices[0];
+                voiceSelect.value = 0;
+            }
+
+            voiceSelect.addEventListener('change', (e) => {
+                selectedVoice = allowedVoices[e.target.value];
+            });
+        }
+
+        // Load voices on page load and when voices change
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        // Speak word with better quality
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+                
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Open Youglish
+        function openYouglish(word, event) {
+            event.stopPropagation();
+            const url = `https://youglish.com/pronounce/${encodeURIComponent(word)}/english`;
+            window.open(url, '_blank');
+        }
+
+        // Render vocabulary
+        function renderVocab() {
+            const grid = document.getElementById('vocabGrid');
+            const count = document.getElementById('vocabCount');
+            
+            grid.innerHTML = '';
+            
+            Object.entries(VOCABULARY).forEach(([word, data]) => {
+                const item = document.createElement('div');
+                item.className = 'vocab-item';
+                
+                // Build tooltip content
+                let tooltipContent = '';
+                if (data.ipa) {
+                    tooltipContent += `<div class="tooltip-ipa">${data.ipa}</div>`;
+                }
+                if (data.paraphrase) {
+                    tooltipContent += `<div class="tooltip-paraphrase">${data.paraphrase}</div>`;
+                }
+                tooltipContent += `<div class="tooltip-meaning">${data.meaning}</div>`;
+                tooltipContent += `<button class="youglish-btn" onclick="openYouglish('${word}', event)">📺 Xem ví dụ Youglish</button>`;
+                
+                item.innerHTML = `
+                    <div class="vocab-word">
+                        <div>${word}</div>
+                        <span class="audio-indicator">🔊</span>
+                    </div>
+                    <div class="tooltip">
+                        ${tooltipContent}
+                    </div>
+                `;
+                
+                item.addEventListener('mouseenter', () => {
+                    speakWord(word);
+                });
+                
+                grid.appendChild(item);
+            });
+            
+            count.textContent = `Tổng cộng: ${Object.keys(VOCABULARY).length} từ vựng`;
+        }
+
+        // Initialize
+        renderVocab();
+    </script>
+</body>
+</html>
